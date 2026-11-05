@@ -31,6 +31,9 @@ public class Punteggio {
      * Promette: una partita 0 a 0, non finita, senza vincitore e con la storia vuota.
      */
     public Punteggio(int puntiPerVincere, int scartoMinimo) {
+        if (puntiPerVincere < 1 || scartoMinimo < 1){
+            throw new IllegalArgumentException("puntiPerVincere e scartoMinimo >= 1");
+        }
         this.puntiPerVincere = puntiPerVincere;
         this.scartoMinimo = scartoMinimo;
         azzera();
@@ -45,6 +48,9 @@ public class Punteggio {
      *           Se la partita era già finita, non cambia niente.
      */
     public void segnaPunto(Lato chi) {
+        if(chi == null){
+            throw new IllegalArgumentException("Non può essere null");
+        }
         if(isFinita()){
             return;
         }
@@ -61,6 +67,9 @@ public class Punteggio {
      * Promette: i punti del lato chi. Non cambia niente.
      */
     public int getPunti(Lato chi) {
+        if(chi == null){
+            throw new IllegalArgumentException("Non può esssere nullo");
+        }
         if (chi == Lato.SINISTRA) {
             return PunteggioSinistra;
         } else{
@@ -132,5 +141,45 @@ public class Punteggio {
         PunteggioDestra = 0;
         PunteggioSinistra = 0;
         storia.clear();
+    }
+
+    /**
+     * 
+     * Lista della storia non nulla
+     * Conteggio PuntiDestra e PuntiSinistra devo corrispondere al numero di occorrenze del lato presente nella storia
+     * Nessun punto puo comparire nella sotria post fine gioco
+     * 
+     */
+    public boolean repOK(){
+       
+        if(storia == null){
+            return false;
+        }
+
+        int sx = 0;
+        int dx = 0;
+
+        for(Lato l : storia){
+            if(l == null){
+                return false;
+            }
+            if (l == Lato.SINISTRA){
+                sx++;
+            } else if (l == Lato.DESTRA){
+                dx++;
+            }
+
+            boolean vince_sx = sx >= puntiPerVincere && sx-dx >= scartoMinimo;
+            boolean vince_dx = dx >= puntiPerVincere && dx-sx >= scartoMinimo;
+
+            boolean finita_postpunto = vince_dx || vince_sx ;
+
+            //se sx + dx < storia -> punti aggiunti post vittoria
+            if(finita_postpunto && (sx + dx) < storia.size()){
+                return false;
+            }
+        }
+
+        return sx == PunteggioSinistra && dx == PunteggioDestra;
     }
 }
